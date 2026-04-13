@@ -1,0 +1,6 @@
+@EkycService.Api_HostAddress = http://localhost:5098
+
+GET {{EkycService.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

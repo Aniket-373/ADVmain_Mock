@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="EkycService.Api/EkycService.Api.csproj" />
+  <Project Path="EkycService.Application/EkycService.Application.csproj" />
+  <Project Path="EkycService.Domain/EkycService.Domain.csproj" />
+  <Project Path="EkycService.Infrastructure/EkycService.Infrastructure.csproj" />
+  <Project Path="EkycService.Tests/EkycService.Tests.csproj" />
+</Solution>
