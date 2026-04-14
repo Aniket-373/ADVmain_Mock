@@ -12,7 +12,16 @@ public interface IDemographicsRepository
     Task SaveAsync(
         Guid refId,
         string nameCipher,
-        string nameIv);
+        string nameIv,
+        DateTime dob,
+        string gender,
+        string? phoneCipher,
+        string? phoneIv,
+        string? emailCipher,
+        string? emailIv,
+        string addressCipher,
+        string addressIv
+    );
 
     Task<DemographicsData> GetByRefIdAsync(Guid refId);
 }
