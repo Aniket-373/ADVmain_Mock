@@ -116,12 +116,15 @@ public class EkycService : IEkycService
         }
     }
 
-    public async Task<string> GetRawXmlAsync(Guid refId)
+    public async Task<string?> GetRawXmlAsync(Guid refId)
     {
-        var data = await _vault.GetByRefIdAsync(refId)
-            ?? throw new KeyNotFoundException($"Vault record not found for {refId}");
+        var data = await _vault.GetByRefIdAsync(refId);
+
+        if (data == null)
+            return null;
 
         var dek = await _hsm.UnwrapDekAsync(data.WrappedDek);
+
         var xmlBytes = _crypto.DecryptGcm(data.XmlCipher, dek, data.IvXml, data.TagXml);
         Array.Clear(dek, 0, dek.Length);
 
@@ -130,8 +133,9 @@ public class EkycService : IEkycService
 
     public async Task<object> GetDemographicsAsync(Guid refId)
     {
-        var data = await _demo.GetByRefIdAsync(refId)
-            ?? throw new KeyNotFoundException($"Demographics not found for {refId}");
+        var data = await _demo.GetByRefIdAsync(refId);
+        if (data == null)
+            return null;
 
         var name = string.IsNullOrEmpty(data.NameCipher) ? null : _crypto.DecryptCbc(data.NameCipher, data.IvName);
         var address = string.IsNullOrEmpty(data.AddressCipher) ? null : _crypto.DecryptCbc(data.AddressCipher, data.IvPoa);

@@ -26,14 +26,28 @@ public class EkycController : ControllerBase
     [HttpGet("ekyc-xml/{refId}")]
     public async Task<IActionResult> GetXml(string refId)
     {
-        var result = await _service.GetRawXmlAsync(Guid.Parse(refId));
+        if (!Guid.TryParse(refId, out var guid))
+            return BadRequest(new { message = "Invalid refId format" });
+
+        var result = await _service.GetRawXmlAsync(guid);
+
+        if (result == null)
+            return NotFound(new { message = "XML not found", refId });
+
         return Ok(result);
     }
 
     [HttpGet("demographics/{refId}")]
     public async Task<IActionResult> GetDemographics(string refId)
     {
-        var result = await _service.GetDemographicsAsync(Guid.Parse(refId));
+        if (!Guid.TryParse(refId, out var guid))
+            return BadRequest(new { message = "Invalid refId format" });
+
+        var result = await _service.GetDemographicsAsync(guid);
+
+        if (result == null)
+            return NotFound(new { message = "Demographics not found", refId });
+
         return Ok(result);
     }
 }

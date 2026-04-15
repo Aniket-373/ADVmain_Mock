@@ -1,10 +1,11 @@
-﻿using System.Diagnostics;
+﻿using Serilog.Context;
 
 namespace EkycService.Api.Middleware;
 
 public class CorrelationIdMiddleware
 {
     private readonly RequestDelegate _next;
+    private const string HeaderName = "X-Correlation-ID";
 
     public CorrelationIdMiddleware(RequestDelegate next)
     {
@@ -13,12 +14,23 @@ public class CorrelationIdMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        var correlationId = Guid.NewGuid().ToString();
+        // 1. Try get from request header
+        var correlationId = context.Request.Headers[HeaderName].FirstOrDefault();
 
+        // 2. If not present → generate
+        if (string.IsNullOrEmpty(correlationId))
+        {
+            correlationId = Guid.NewGuid().ToString();
+        }
+
+        // 3. Store in context
         context.Items["CorrelationId"] = correlationId;
 
-        // Push into logging scope
-        using (Serilog.Context.LogContext.PushProperty("correlation_id", correlationId))
+        // 4. Add to response header (VERY IMPORTANT)
+        context.Response.Headers["x-correlation-id"] = correlationId;
+
+        // 5. Push into Serilog context
+        using (Serilog.Context.LogContext.PushProperty("CorrelationId", correlationId))
         {
             await _next(context);
         }

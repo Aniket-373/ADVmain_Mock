@@ -1,4 +1,5 @@
 ﻿using EkycService.Infrastructure.Logging;
+using Serilog;
 
 namespace EkycService.Api.Middleware;
 
@@ -19,13 +20,21 @@ public class GlobalExceptionMiddleware
         }
         catch (Exception ex)
         {
-            SafeLogger.Error<GlobalExceptionMiddleware>(ex, "Unhandled error");
+            var correlationId = ctx.Items["CorrelationId"]?.ToString();
 
-            Console.WriteLine("EXCEPTION:");
-            Console.WriteLine(ex.ToString());
+            Log.Error(ex,
+                "ERROR: {Message} | Path: {Path}",
+                ex.Message,
+                ctx.Request.Path.Value
+            );
 
             ctx.Response.StatusCode = 500;
-            await ctx.Response.WriteAsync("Internal Server Error");
+
+            await ctx.Response.WriteAsJsonAsync(new
+            {
+                message = "Internal Server Error",
+                correlationId
+            });
         }
     }
 }

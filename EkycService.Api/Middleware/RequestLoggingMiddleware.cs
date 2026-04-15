@@ -16,18 +16,30 @@ public class RequestLoggingMiddleware
     {
         var sw = Stopwatch.StartNew();
 
+        var correlationId = ctx.Items["CorrelationId"]?.ToString();
+
         SafeLogger.Info<RequestLoggingMiddleware>(
-            "Request {Method} {Path}",
-            ctx.Request.Method,
-            ctx.Request.Path);
+            "HTTP_REQUEST",
+            new
+            {
+                type = "request",
+                method = ctx.Request.Method,
+                path = ctx.Request.Path,
+                correlation_id = correlationId
+            });
 
         await _next(ctx);
 
         sw.Stop();
 
         SafeLogger.Info<RequestLoggingMiddleware>(
-            "Response {Status} {Time}ms",
-            ctx.Response.StatusCode,
-            sw.ElapsedMilliseconds);
+            "HTTP_RESPONSE",
+            new
+            {
+                type = "response",
+                status = ctx.Response.StatusCode,
+                duration_ms = sw.ElapsedMilliseconds,
+                correlation_id = correlationId
+            });
     }
 }
