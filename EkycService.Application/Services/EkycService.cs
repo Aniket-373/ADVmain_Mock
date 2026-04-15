@@ -15,17 +15,20 @@ public class EkycService : IEkycService
     private readonly IHsmProvider _hsm;
     private readonly IKycResParser _parser;
     private readonly IUidaiDecryptionService _uidai;
+    private readonly IUidaiClient _uidaiClient;
 
     public EkycService(
         ICryptoService crypto, IHsmProvider hsm,
         IKycResParser parser, IEkycSaveRepository saveRepo,
         IUidaiDecryptionService uidai, IVaultRepository vault,
-        IDemographicsRepository demo, IAuditRepository audit)
+        IDemographicsRepository demo, IAuditRepository audit,
+         IUidaiClient uidaiClient)
     {
         _crypto = crypto; _hsm = hsm;
         _parser = parser; _saveRepo = saveRepo;
         _uidai = uidai; _vault = vault;
         _demo = demo; _audit = audit;
+        _uidaiClient = uidaiClient; 
     }
 
     public async Task<SaveEkycResponse> SaveAsync(SaveEkycRequest request)
@@ -35,8 +38,11 @@ public class EkycService : IEkycService
 
         try
         {
-            // Step 1 — Parse the UIDAI response
-            var decryptedXml = _uidai.ExtractAndDecode(request.UidaiResponseXml);
+            // Step 1 — Call UIDAI
+            var rawXml = await _uidaiClient.GetKycXmlAsync(request.Uid);
+
+            //  Decrypt/Decode UIDAI response
+            var decryptedXml = _uidai.ExtractAndDecode(rawXml);
             var parsed = _parser.Parse(decryptedXml);
 
             // Step 2 — Generate a fresh DEK for this record

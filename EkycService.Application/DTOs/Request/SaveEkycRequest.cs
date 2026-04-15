@@ -8,5 +8,5 @@ namespace EkycService.Application.DTOs.Request;
 
 public class SaveEkycRequest
 {
-    public string UidaiResponseXml { get; set; }
+    public string Uid { get; set; }
 }

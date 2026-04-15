@@ -11,6 +11,7 @@ using Serilog.Events;
 using Serilog.Formatting.Compact;
 using Serilog.Sinks.Http.BatchFormatters;
 using System.Globalization;
+using EkycService.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -85,6 +86,7 @@ builder.Host.UseSerilog();
 
 // DI
 builder.Services.AddControllers();
+builder.Services.AddHttpClient<IUidaiClient, UidaiClient>();
 builder.Services.AddScoped<IEkycService, EkycService.Application.Services.EkycService>();
 builder.Services.AddScoped<ICryptoService, CryptoService>();
 builder.Services.AddSingleton<IHsmProvider, HsmProvider>();
